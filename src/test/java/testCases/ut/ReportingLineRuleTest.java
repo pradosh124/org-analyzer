@@ -49,16 +49,13 @@ public class ReportingLineRuleTest {
 
     @Test
     void testReportingLineWithinLimit() {
-        // Employees with depth <= 4 → e3 depth = 4 → no issue
         List<String> results = reportingLineRule.validate(employees, managerToSubordinates);
         assertTrue(results.stream().anyMatch(s -> s.contains("Sam")));
-        // Check CEO has no issues
         assertFalse(results.stream().anyMatch(s -> s.contains("John")));
     }
 
     @Test
     void testEmployeeWithTooLongReportingLine() {
-        // e4 (Sam) has depth = 5 → issue
         List<String> results = reportingLineRule.validate(employees, managerToSubordinates);
         assertTrue(results.stream().anyMatch(s -> s.contains("Sam") && s.contains("too long")));
     }
