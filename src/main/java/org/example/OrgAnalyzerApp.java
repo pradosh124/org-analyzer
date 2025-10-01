@@ -9,7 +9,7 @@ import java.util.Map;
 public class OrgAnalyzerApp {
     public static void main(String[] args) throws IOException {
         OrgAnalyzer analyzer = new OrgAnalyzer();
-        analyzer.loadEmployees("src/main/resources/employees1.csv");
+        analyzer.loadEmployees("src/main/resources/employees.csv");
 
         Map<String, List<String>> salaryIssues = analyzer.checkManagerSalaries();
         System.out.println("\n=== Underpaid Managers ===");
