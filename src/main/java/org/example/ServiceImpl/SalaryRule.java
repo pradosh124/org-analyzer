@@ -23,9 +23,9 @@ public class SalaryRule implements OrgRule {
             double maxAllowed = avgSalary * MAX_MULTIPLIER;
 
             if (manager.getSalary() < minAllowed) {
-                results.add(manager + " earns LESS than allowed by " + String.format("%.2f", minAllowed - manager.getSalary()));
+                results.add(manager + " earn less than they should, and by " + String.format("%.2f", minAllowed - manager.getSalary()));
             } else if (manager.getSalary() > maxAllowed) {
-                results.add(manager + " earns MORE than allowed by " + String.format("%.2f", manager.getSalary() - maxAllowed));
+                results.add(manager + " earn more than they should, and by " + String.format("%.2f", manager.getSalary() - maxAllowed));
             }
         }
 
