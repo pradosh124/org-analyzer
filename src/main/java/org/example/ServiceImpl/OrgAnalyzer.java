@@ -9,6 +9,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.stream.Stream;
 
 public class OrgAnalyzer {
     private Map<Integer, Employee> employees = new HashMap<>();
@@ -17,32 +18,55 @@ public class OrgAnalyzer {
 
     // Load CSV
     public void loadEmployees(String filePath) throws IOException {
-        List<String> lines = Files.readAllLines(Paths.get(filePath));
-        lines.remove(0); // remove header
+        try (Stream<String> lines = Files.lines(Paths.get(filePath))) {
+            lines.skip(1) // skip header
+                    .filter(line -> !line.trim().isEmpty()) // skip blank lines
+                    .forEach(line -> {
+                        String[] parts = line.split(",", -1);
 
-        for (String line : lines) {
-            String[] parts = line.split(",", -1);
-            String idStr = parts[0].replaceAll("\"", "").trim();
-            if (idStr.isEmpty()) {
-                continue;
-            }
-            int id = Integer.parseInt(idStr);
-            String firstName = parts[1].trim();
-            String lastName = parts[2].trim();
-            double salary = Double.parseDouble(parts[3].trim());
-            String mgr = parts[4].trim().replace("\"", "");
-            Integer managerId = mgr.isBlank() ? null : Integer.parseInt(mgr);
+                        String idStr = parts[0].replaceAll("\"", "").trim();
+                        if (idStr.isEmpty()) {
+                            return; // skip empty ID
+                        }
 
-            Employee emp = new Employee(id, firstName, lastName, salary, managerId);
-            employees.put(id, emp);
+                        int id;
+                        try {
+                            id = Integer.parseInt(idStr);
+                        } catch (NumberFormatException e) {
+                            System.err.println("Invalid employee ID: " + idStr);
+                            return;
+                        }
 
-            if (managerId == null) {
-                ceo = emp;
-            } else {
-                managerToSubordinates.computeIfAbsent(managerId, k -> new ArrayList<>()).add(emp);
-            }
+                        String firstName = parts[1].trim();
+                        String lastName = parts[2].trim();
+
+                        double salary;
+                        try {
+                            salary = Double.parseDouble(parts[3].trim());
+                        } catch (NumberFormatException e) {
+                            System.err.println("Invalid salary for employee ID " + idStr + ": " + parts[3]);
+                            return;
+                        }
+
+                        String mgr = parts[4].trim().replace("\"", "");
+                        Integer managerId = mgr.isBlank() ? null : Integer.parseInt(mgr);
+
+                        Employee emp = new Employee(id, firstName, lastName, salary, managerId);
+                        employees.put(id, emp);
+
+                        if (managerId == null) {
+                            // Ensure only one CEO
+                            if (ceo != null) {
+                                System.err.println("Warning: Multiple CEOs detected! Previous CEO: " + ceo + ", New CEO: " + emp);
+                            }
+                            ceo = emp;
+                        } else {
+                            managerToSubordinates.computeIfAbsent(managerId, k -> new ArrayList<>()).add(emp);
+                        }
+                    });
         }
     }
+
 
     // Rule 1: Salary check
     public Map<String, List<String>> checkManagerSalaries() {

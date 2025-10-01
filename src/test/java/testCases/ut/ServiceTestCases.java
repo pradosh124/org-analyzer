@@ -85,7 +85,7 @@ import static org.junit.jupiter.api.Assertions.*;
         assertFalse(reportingIssues.stream().anyMatch(s -> s.contains("Alice")));
     }
 
-    @Test
+     @Test
     void testNoReportingLineIssuesForShortChains() throws IOException {
         // Create a CSV with depth ≤4
         OrgAnalyzer analyzer2 = new OrgAnalyzer();
